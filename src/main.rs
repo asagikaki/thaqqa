@@ -34,10 +34,10 @@ fn encode(letter : &str,language : &Language,aligment : &Aligment, font : &str) 
             if l {data = data.move_to((n0,n1));} else {data = data.move_by((n0,n1));}
         },
         Point::H(l,n0) => {
-            if l {data = data.horizontal_line_to(n0);} else {data = data.horizontal_line_by((n0));}
+            if l {data = data.horizontal_line_to(n0);} else {data = data.horizontal_line_by(n0);}
         },
         Point::V(l,n0) => {
-            if l {data = data.vertical_line_to(n0);} else {data = data.vertical_line_by((n0));}
+            if l {data = data.vertical_line_to(n0);} else {data = data.vertical_line_by(n0);}
         },
         Point::L( l, n0, n1) => {
             if l {data = data.line_to((n0,n1));} else {data = data.line_by((n0,n1));}
@@ -84,8 +84,8 @@ fn calc(letter : &str,language : &Language,aligment : &Aligment, font : &str) ->
     //Glyphvec：内部で
     if FontTable::get_datatable("GPOS",font).is_none() { Err(String::from("font was not found"))}
     else{
-        let k = Parser::parse(letter,language);
-        let k = Gsub::gsub(&k,aligment,font);
+        let j = Parser::parse(letter,language);
+        let k = Gsub::gsub(&j,aligment,font);
         let l = Glyphvec::new(16.0,&k,aligment,font,"","");
         Ok(l.d)
     }
@@ -116,9 +116,7 @@ impl HttpService for HelloWorld {
             //"/400" => (400, "Bad Request"),
             //"/500" => (500, "Internal Server Error"),
             p if p.starts_with("/api") => {
-                rsp.header("Content-Type: application/json");
                 let ans:Vec<&str> = p.split("/").collect();
-                println!("{:?}",ans);
                 if ans.len() < 6 || 8 <= ans.len() || (ans.len() == 7 && !ans[6].starts_with("?")) { (404, "Not Found",String::from("Not Found")) } // そんなもの作りようがあるか
                 else {
                     let lang = match ans[3]{
@@ -136,9 +134,10 @@ impl HttpService for HelloWorld {
                     
                     if lang.is_none() || alig.is_none() {(404, "Not Found",String::from("Not Found"))}
                     else {
-                        (200, "OK", match calc(ans[5],lang.unwrap(),alig.unwrap(),ans[2]){
-                            Ok(svg) => svg.to_string(),
-                            Err(str) => str,
+                        let moji = String::from_utf8(URL_SAFE.decode(ans[5]).unwrap()).unwrap();
+                        (200, "OK", match calc(moji.as_str(),lang.unwrap(),alig.unwrap(),ans[2]){
+                            Ok(svg) => {rsp.header("Content-Type: application/json");svg.to_string()},
+                            Err(str) => {rsp.header("Content-Type: html");str},
                         })
                     }
                 }

@@ -31,9 +31,7 @@ impl Font{
     }
 
     pub fn get_datatable_unwraped<'a>(&'a mut self,name:&str) -> &'a mut DataTable{
-        if let Some(f) = self.get_datatable(name){
-            f
-        } else { panic!("Datatable {} が存在しません",name)}
+        if let Some(f) = self.get_datatable(name){ f } else { panic!("Datatable {} が存在しません",name)}
     }
 
     pub fn create_datatable<'a>(&'a mut self,name:&str) -> Result<&'a mut DataTable,FontError>{
