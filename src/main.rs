@@ -135,7 +135,7 @@ impl HttpService for HelloWorld {
                     if lang.is_none() || alig.is_none() {(404, "Not Found",String::from("Not Found"))}
                     else {
                         let moji = String::from_utf8(URL_SAFE.decode(ans[5]).unwrap()).unwrap();
-                        (200, "OK", match calc(moji.as_str(),lang.unwrap(),alig.unwrap(),ans[2]){
+                        (200, "OK", match calc(&moji,lang.unwrap(),alig.unwrap(),ans[2]){
                             Ok(svg) => {rsp.header("Content-Type: application/json");svg.to_string()},
                             Err(str) => {rsp.header("Content-Type: html");str},
                         })
